@@ -14,6 +14,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OrderTest {
     private WebDriver driver;
@@ -41,36 +42,64 @@ public class OrderTest {
 
     @Test
     void shouldOrderSuccess() {
-        WebElement form = driver.findElement(By.cssSelector("[action='/']"));
-        form.findElement(By.cssSelector("[data-test-id=name] input")).sendKeys("Петров Иван");
-        form.findElement(By.cssSelector("[data-test-id=phone] input")).sendKeys("+79991234567");
-        form.findElement(By.cssSelector("[data-test-id=agreement]")).click();
-        form.findElement(By.cssSelector("button")).click();
+        driver.findElement(By.cssSelector("[data-test-id=name] input")).sendKeys("Петров Иван");
+        driver.findElement(By.cssSelector("[data-test-id=phone] input")).sendKeys("+79991234567");
+        driver.findElement(By.cssSelector("[data-test-id=agreement]")).click();
+        driver.findElement(By.cssSelector("button")).click();
         String text = driver.findElement(By.cssSelector("[data-test-id=order-success]")).getText();
         assertEquals("Ваша заявка успешно отправлена! Наш менеджер свяжется с вами в ближайшее время.", text.trim());
     }
 
     @Test
     void shouldWarningMessageIfNotValidName() {
-        WebElement form = driver.findElement(By.cssSelector("[action='/']"));
-        form.findElement(By.cssSelector("[data-test-id=name] input")).sendKeys("Petrov Ivan");
-        form.findElement(By.cssSelector("[data-test-id=phone] input")).sendKeys("+79991234567");
-        form.findElement(By.cssSelector("[data-test-id=agreement]")).click();
-        form.findElement(By.cssSelector("button")).click();
-        List<WebElement> elements = driver.findElements(By.className("input__sub"));
-        String text = elements.get(0).getText();
-        assertEquals("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.", text.trim());
+        driver.findElement(By.cssSelector("[data-test-id=name] input")).sendKeys("Petrov Ivan");
+        driver.findElement(By.cssSelector("[data-test-id=phone] input")).sendKeys("+79991234567");
+        driver.findElement(By.cssSelector("[data-test-id=agreement]")).click();
+        driver.findElement(By.cssSelector("button")).click();
+        assertEquals("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.",
+                driver.findElement(By.cssSelector("[data-test-id=name].input_invalid .input__sub")).getText().trim());
+        assertTrue(driver.findElement(By.cssSelector("[data-test-id=name].input_invalid .input__sub")).isDisplayed());
+    }
+
+    @Test
+    void shouldWarningMessageIfEmptyName() {
+        driver.findElement(By.cssSelector("[data-test-id=phone] input")).sendKeys("+79991234567");
+        driver.findElement(By.cssSelector("[data-test-id=agreement]")).click();
+        driver.findElement(By.cssSelector("button")).click();
+        assertEquals("Поле обязательно для заполнения",
+                driver.findElement(By.cssSelector("[data-test-id=name].input_invalid .input__sub")).getText().trim());
+        assertTrue(driver.findElement(By.cssSelector("[data-test-id=name].input_invalid .input__sub")).isDisplayed());
     }
 
     @Test
     void shouldWarningMessageIfNotValidPhone() {
-        WebElement form = driver.findElement(By.cssSelector("[action='/']"));
-        form.findElement(By.cssSelector("[data-test-id=name] input")).sendKeys("Петров Иван");
-        form.findElement(By.cssSelector("[data-test-id=phone] input")).sendKeys("+7999123456");
-        form.findElement(By.cssSelector("[data-test-id=agreement]")).click();
-        form.findElement(By.cssSelector("button")).click();
-        List<WebElement> elements = driver.findElements(By.className("input__sub"));
-        String text = elements.get(1).getText();
-        assertEquals("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.", text.trim());
+        driver.findElement(By.cssSelector("[data-test-id=name] input")).sendKeys("Петров Иван");
+        driver.findElement(By.cssSelector("[data-test-id=phone] input")).sendKeys("+7999123456");
+        driver.findElement(By.cssSelector("[data-test-id=agreement]")).click();
+        driver.findElement(By.cssSelector("button")).click();
+        assertEquals("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.",
+                driver.findElement(By.cssSelector("[data-test-id=phone].input_invalid .input__sub")).getText().trim());
+        assertTrue(driver.findElement(By.cssSelector("[data-test-id=phone].input_invalid .input__sub")).isDisplayed());
+    }
+
+    @Test
+    void shouldWarningMessageIfEmptyPhone() {
+        driver.findElement(By.cssSelector("[data-test-id=name] input")).sendKeys("Петров Иван");
+        driver.findElement(By.cssSelector("[data-test-id=agreement]")).click();
+        driver.findElement(By.cssSelector("button")).click();
+        assertEquals("Поле обязательно для заполнения",
+                driver.findElement(By.cssSelector("[data-test-id=phone].input_invalid .input__sub")).getText().trim());
+        assertTrue(driver.findElement(By.cssSelector("[data-test-id=phone].input_invalid .input__sub")).isDisplayed());
+    }
+
+    @Test
+    void shouldWarningMessageIfNotClickCheckbox() {
+        driver.findElement(By.cssSelector("[data-test-id=name] input")).sendKeys("Петров Иван");
+        driver.findElement(By.cssSelector("[data-test-id=phone] input")).sendKeys("+79991234567");
+        driver.findElement(By.cssSelector("button")).click();
+        assertEquals("Я соглашаюсь с условиями обработки и использования моих персональных данных и " +
+                        "разрешаю сделать запрос в бюро кредитных историй",
+                driver.findElement(By.cssSelector("[data-test-id=agreement].input_invalid .checkbox__text")).getText().trim());
+        assertTrue(driver.findElement(By.cssSelector("[data-test-id=agreement].input_invalid .checkbox__text")).isDisplayed());
     }
 }
